@@ -24,15 +24,25 @@ board.on("ready", () => {
   const relay = new Relays([13, 11, 10, 9, 8, 7, 6, 5], {
     type: "NC",
   });
-  server.get("/", (req, res) => {
-    let isOne = true;
 
-    if (!isOne) {
+  let isOne = false;
+  server.get("/", (req, res) => {
+    res.render("index");
+  });
+
+  server.get("/led", (req, res) => {
+    const { led } = req.query;
+
+    isOne = !led;
+
+    console.log(isOne);
+
+    if (isOne) {
       relay.off();
     } else {
       relay.on();
     }
-    res.render("index", { r: isOne });
+    res.json({ l: isOne });
   });
 
   server.listen(3000, () => {
