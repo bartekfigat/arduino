@@ -2,7 +2,15 @@ const SerialPort = require("serialport").SerialPort;
 const express = require("express");
 const morgan = require("morgan");
 const path = require("path");
-const { Board, Led, Button, Switch, Relays, LCD } = require("johnny-five");
+const {
+  Board,
+  Led,
+  Button,
+  Switch,
+  Relays,
+  Thermometer,
+  LCD,
+} = require("johnny-five");
 
 const board = new Board({
   port: "COM11",
@@ -25,27 +33,35 @@ board.on("ready", () => {
     type: "NC",
   });
 
+  newFunction(relay);
+
+  // const temperature = new Thermometer({
+  //   pin: "A0",
+  // });
+
+  // temperature.on("data", function () {
+  //   console.log(`celsius: ${this.C}`);
+  // });
+});
+function newFunction(relay) {
   let isOne = false;
   server.get("/", (req, res) => {
     res.render("index");
   });
-
   server.get("/led", (req, res) => {
     const { led } = req.query;
-
-    isOne = !led;
-
+    isOne = led === "true";
     console.log(isOne);
-
     if (isOne) {
-      relay.off();
+      relay[0].off();
     } else {
-      relay.on();
+      relay[0].on();
     }
     res.json({ l: isOne });
   });
 
-  server.listen(3000, () => {
-    console.log("Server running");
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, process.env.IP, () => {
+    console.log(`Server is listening on port ${PORT}`);
   });
-});
+}
