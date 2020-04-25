@@ -49,8 +49,8 @@ function newFunction(relay) {
     res.json({ l: isOne });
   });
 
-  const PORT = process.env.PORT || 3000;
-  server.listen(PORT, process.env.IP, () => {
+  const port = process.env.PORT || 3000;
+  server.listen(port, () => {
     console.log(`Server is listening on port ${PORT}`);
   });
 }
