@@ -17,10 +17,7 @@ const board = new Board({
 });
 
 server = express();
-
 server.use(morgan("tiny"));
-// view engine setup
-// view engine setup
 server.set("views", path.join(__dirname, "views"));
 server.set("view engine", "ejs");
 // Staic file
@@ -34,14 +31,6 @@ board.on("ready", () => {
   });
 
   newFunction(relay);
-
-  // const temperature = new Thermometer({
-  //   pin: "A0",
-  // });
-
-  // temperature.on("data", function () {
-  //   console.log(`celsius: ${this.C}`);
-  // });
 });
 function newFunction(relay) {
   let isOne = false;

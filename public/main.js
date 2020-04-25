@@ -1,7 +1,5 @@
 const btn = document.getElementById("toggle2");
 
-console.log(btn.checked);
-
 btn.addEventListener("click", () => {
   if (btn.checked) {
     fetch(`http://localhost:3000/led/?led=${true}`)
