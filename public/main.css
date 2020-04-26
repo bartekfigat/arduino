@@ -76,3 +76,7 @@
 .checkbox-container.purple input:checked + label {
   background-color: #735dd0;
 }
+
+body {
+  background-color: antiquewhite;
+}

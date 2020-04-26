@@ -10,10 +10,17 @@
   "author": "Bartlomiej Figatowski",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
     "ejs": "^3.0.2",
+    "etag": "^1.8.1",
     "express": "^4.17.1",
+    "express-device": "^0.4.2",
+    "express-favicon": "^2.0.1",
     "johnny-five": "^1.4.0",
     "morgan": "^1.10.0",
+    "ngrok": "^3.2.7",
     "serialport": "^8.0.7"
   }
 }
