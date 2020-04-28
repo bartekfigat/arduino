@@ -43,33 +43,35 @@ server.disable("etag");
 
 board.on("ready", async () => {
   console.log("redy");
-  const relay = await new Relay({
-    type: "NC",
-    pin: 13,
-    id: "kuchnia",
-  });
 
-  newFunction(relay);
+  try {
+    const relay = await new Relay({
+      type: "NC",
+      pin: 13,
+      id: "kuchnia",
+    });
+
+    let isOne = false;
+    server.get("/", (req, res) => {
+      res.render("index");
+    });
+    server.get("/led", (req, res) => {
+      const { led } = req.query;
+      isOne = led === "true";
+      console.log(isOne);
+      if (!isOne) {
+        relay.off();
+      } else {
+        relay.on();
+      }
+
+      res.json({ l: isOne });
+    });
+
+    server.listen(process.env.PORT, () => {
+      console.log(`Server is listening on port: ${process.env.PORT}`);
+    });
+  } catch (err) {
+    console.log(err);
+  }
 });
-function newFunction(relay) {
-  let isOne = false;
-  server.get("/", (req, res) => {
-    res.render("index");
-  });
-  server.get("/led", (req, res) => {
-    const { led } = req.query;
-    isOne = led === "true";
-    console.log(isOne);
-    if (!isOne) {
-      relay.off();
-    } else {
-      relay.on();
-    }
-
-    res.json({ l: isOne });
-  });
-
-  server.listen(process.env.PORT, () => {
-    console.log(`Server is listening on port: ${process.env.PORT}`);
-  });
-}
