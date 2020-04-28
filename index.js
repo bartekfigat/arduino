@@ -6,6 +6,7 @@ const morgan = require("morgan");
 const ngrok = require("ngrok");
 const cors = require("cors");
 const etag = require("etag");
+const net = require("net");
 const bodyParser = require("body-parser");
 const favicon = require("express-favicon");
 const path = require("path");
@@ -17,6 +18,7 @@ const {
   Relays,
   Thermometer,
   LCD,
+  Relay,
 } = require("johnny-five");
 
 const board = new Board({
@@ -39,10 +41,12 @@ server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
 server.disable("etag");
 
-board.on("ready", () => {
+board.on("ready", async () => {
   console.log("redy");
-  const relay = new Relays([13, 11, 10, 9, 8, 7, 6, 5], {
+  const relay = await new Relay({
     type: "NC",
+    pin: 13,
+    id: "kuchnia",
   });
 
   newFunction(relay);
@@ -56,7 +60,7 @@ function newFunction(relay) {
     const { led } = req.query;
     isOne = led === "true";
     console.log(isOne);
-    if (isOne) {
+    if (!isOne) {
       relay.off();
     } else {
       relay.on();
@@ -65,20 +69,24 @@ function newFunction(relay) {
     res.json({ l: isOne });
   });
 
-  server.listen(process.env.PORT || 8080, () => {
-    console.log(`Server is listening on port`);
+  server.listen(process.env.PORT, () => {
+    console.log(`Server is listening on port: ${process.env.PORT}`);
     (async function () {
       const opts = {
         addr: process.env.PORT, // port or network address, defaults to 80
         auth: "user:pwd",
         authtoken: `${process.env.Authtoken}`, // http basic authentication for tunnel
       };
-      const url = await ngrok.connect(opts).catch((err) => {
+      const url = await ngrok.connect(opts);
+
+      try {
+        const url = await ngrok.connect(opts);
+        console.log(
+          `Public accessible tunnel to localhost:${process.env.PORT} is availbale on ${url}`
+        );
+      } catch (err) {
         console.log(err);
-      });
-      console.log(
-        `Public accessible tunnel to localhost:${process.env.PORT} is availbale on ${url}`
-      );
+      }
     })();
   });
 }

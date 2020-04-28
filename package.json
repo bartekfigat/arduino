@@ -18,8 +18,10 @@
     "express": "^4.17.1",
     "express-device": "^0.4.2",
     "express-favicon": "^2.0.1",
+    "http-proxy": "^1.18.0",
     "johnny-five": "^1.4.0",
     "morgan": "^1.10.0",
+    "net": "^1.0.2",
     "ngrok": "^3.2.7",
     "serialport": "^8.0.7"
   }
