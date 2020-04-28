@@ -71,22 +71,5 @@ function newFunction(relay) {
 
   server.listen(process.env.PORT, () => {
     console.log(`Server is listening on port: ${process.env.PORT}`);
-    (async function () {
-      const opts = {
-        addr: process.env.PORT, // port or network address, defaults to 80
-        auth: "user:pwd",
-        authtoken: `${process.env.Authtoken}`, // http basic authentication for tunnel
-      };
-      const url = await ngrok.connect(opts);
-
-      try {
-        const url = await ngrok.connect(opts);
-        console.log(
-          `Public accessible tunnel to localhost:${process.env.PORT} is availbale on ${url}`
-        );
-      } catch (err) {
-        console.log(err);
-      }
-    })();
   });
 }
