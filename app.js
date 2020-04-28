@@ -66,7 +66,7 @@ board.on("ready", async () => {
       res.json({ l: isOne });
     });
 
-    server.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT || 8080, () => {
       console.log(`Server is listening on port: ${process.env.PORT}`);
     });
   } catch (err) {
