@@ -42,8 +42,6 @@ server.use(bodyParser.json());
 server.disable("etag");
 
 board.on("ready", async () => {
-  console.log("redy");
-
   try {
     const relay = await new Relay({
       type: "NC",
