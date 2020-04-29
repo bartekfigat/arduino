@@ -21,7 +21,9 @@ const {
   Relay,
 } = require("johnny-five");
 
-const board = new Board();
+const board = new Board({
+  port: process.env.portCom,
+});
 
 server = express();
 server.use(morgan("tiny"));
