@@ -1,29 +1,47 @@
 require("dotenv").config();
-const SerialPort = require("serialport").SerialPort;
-const device = require("express-device");
 const express = require("express");
 const morgan = require("morgan");
 const ngrok = require("ngrok");
 const cors = require("cors");
-const etag = require("etag");
-const net = require("net");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+const db = require("./config/db");
 const favicon = require("express-favicon");
+const Home = require("./models/Home");
 const path = require("path");
-const {
-  Board,
-  Led,
-  Button,
-  Switch,
-  Relays,
-  Thermometer,
-  LCD,
-  Relay,
-} = require("johnny-five");
+const { Board, LCD, Relay } = require("johnny-five");
 
-const board = new Board({
-  port: process.env.portCom,
-});
+const saltRounds = 10;
+const myPlaintextPassword = `${process.env.Password}`;
+
+//function that searches all database
+(async function all() {
+  let home = await Home.find({});
+  console.log(home);
+})();
+
+//============with promises================
+// Load hash from your password DB.
+// bcrypt.compare(myPlaintextPassword, hash).then(function(result) {
+// result == true
+// });
+// bcrypt.compare(someOtherPlaintextPassword, hash).then(function(result) {
+// result == false
+// });
+
+// (async function () {
+//   const hash = await bcrypt.hash(myPlaintextPassword, saltRounds);
+
+//   try {
+//     Home.insertMany({
+//       email: `${process.env.email}`,
+//       password: hash,
+//       light: false,
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// })();
 
 server = express();
 server.use(morgan("tiny"));
@@ -33,43 +51,21 @@ server.set("view engine", "ejs");
 server.use(express.static("public"));
 server.use(express.static(path.join(__dirname, "public")));
 server.use(favicon(__dirname + "/public/favicon.png"));
-server.use(express.static(__dirname + "/public/main.css"));
-server.use(express.static(__dirname + "/public/main.js"));
-server.use(device.capture());
 server.use(cors());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
-server.disable("etag");
 
-board.on("ready", async () => {
-  try {
-    const relay = await new Relay({
-      type: "NC",
-      pin: 13,
-      id: "kuchnia",
-    });
+//DB connect
+db.dbConnection();
 
-    let isOne = false;
-    server.get("/", (req, res) => {
-      res.render("index");
-    });
-    server.get("/led", (req, res) => {
-      const { led } = req.query;
-      isOne = led === "true";
-      console.log(isOne);
-      if (!isOne) {
-        relay.off();
-      } else {
-        relay.on();
-      }
+server.get("/", (req, res) => {
+  res.render("index");
+});
 
-      res.json({ l: isOne });
-    });
+server.get("/led", (req, res) => {
+  const { led } = req.query;
+});
 
-    server.listen(process.env.PORT || 8080, () => {
-      console.log(`Server is listening on port: ${process.env.PORT}`);
-    });
-  } catch (err) {
-    console.log(err);
-  }
+server.listen(process.env.PORT || 8080, () => {
+  console.log(`Server is listening on port: ${process.env.PORT}`);
 });
