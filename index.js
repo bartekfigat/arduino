@@ -37,11 +37,6 @@ server.get("/led", async (req, res) => {
   const { led } = req.query;
   console.log(led);
 
-  pipeline = [
-    { $match: { _id: "5eab53d3a524043460a84354" } },
-    { fullDocument: "updateLookup" },
-  ];
-
   const changeStream = Home.watch().on("change", (data) => {
     console.log(data);
   });
