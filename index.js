@@ -76,16 +76,21 @@ server.get("/led", async (req, res) => {
   const { led } = req.query;
   console.log(led);
 
-  pipeline = [{ $match: { _id: "5eab53d3a524043460a84354" } }];
+  pipeline = [
+    { $match: { _id: "5eab53d3a524043460a84354" } },
+    { fullDocument: "updateLookup" },
+  ];
 
-  const changeStream = Home.watch(pipeline);
-
-  changeStream.on("change", async (event) => {
-    await Home.updateOne({ _id: "5eab53d3a524043460a84354" }, { light: led });
-
-    const match = await Home.findOne({ _id: "5eab53d3a524043460a84354" });
-    console.log(match.light);
+  const changeStream = Home.watch().on("change", (data) => {
+    console.log(data);
   });
+
+  console.log(changeStream);
+
+  await Home.updateOne({ _id: "5eab53d3a524043460a84354" }, { light: led });
+
+  const match = await Home.findOne({ _id: "5eab53d3a524043460a84354" });
+  console.log(match.light);
 });
 
 server.listen(process.env.PORT || 8080, process.env.IP, () => {
