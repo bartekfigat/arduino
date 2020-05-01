@@ -2,7 +2,7 @@ const btn = document.getElementById("toggle2");
 
 btn.addEventListener("click", () => {
   if (btn.checked) {
-    fetch(`/led/?led=${true}`)
+    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${true}`)
       .then((res) => {
         return res.json();
       })
@@ -14,7 +14,7 @@ btn.addEventListener("click", () => {
         console.log(err);
       });
   } else {
-    fetch(`/led/?led=${false}`)
+    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${false}`)
       .then((res) => {
         return res.json();
       })

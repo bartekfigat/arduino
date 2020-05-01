@@ -80,19 +80,14 @@ server.get("/led", async (req, res) => {
 
   const changeStream = Home.watch(pipeline);
 
-  changeStream.on("change", function (event) {
-    console.log(JSON.stringify(event));
+  changeStream.on("change", async (event) => {
+    await Home.updateOne({ _id: "5eab53d3a524043460a84354" }, { light: led });
+
+    const match = await Home.findOne({ _id: "5eab53d3a524043460a84354" });
+    console.log(match.light);
   });
-
-  let repalce = await Home.updateOne(
-    { _id: "5eab53d3a524043460a84354" },
-    { light: led }
-  );
-
-  const match = await Home.findOne({ _id: "5eab53d3a524043460a84354" });
-  console.log(match.light);
 });
 
-server.listen(process.env.PORT || 8080, () => {
+server.listen(process.env.PORT || 8080, process.env.IP, () => {
   console.log(`Server is listening on port: ${process.env.PORT}`);
 });
