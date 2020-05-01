@@ -10,15 +10,25 @@ const favicon = require("express-favicon");
 const Home = require("./models/Home");
 const path = require("path");
 const { Board, LCD, Relay } = require("johnny-five");
-
+//https://docs.mongodb.com/stitch/mongodb/watch/
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
 
-//function that searches all database
-(async function all() {
-  let home = await Home.find({});
-  console.log(home);
-})();
+// const pipeline = [
+//   { $match: { _id: "5eab53d3a524043460a84354" } },
+//   { $set: { light: "got" } },
+// ];
+// async function watcher() {
+//   const collection = Home.watch();
+
+//   const changeStream = collection.watch(pipeline);
+
+//   console.log(changeStream);
+// let home = await Home.find({});
+// // // await Home.deleteOne({});
+// console.log(home);
+
+// watcher();
 
 //============with promises================
 // Load hash from your password DB.
@@ -36,7 +46,7 @@ const myPlaintextPassword = `${process.env.Password}`;
 //     Home.insertMany({
 //       email: `${process.env.email}`,
 //       password: hash,
-//       light: false,
+//       created: new Date().getTime(),
 //     });
 //   } catch (err) {
 //     console.log(err);
@@ -62,8 +72,25 @@ server.get("/", (req, res) => {
   res.render("index");
 });
 
-server.get("/led", (req, res) => {
+server.get("/led", async (req, res) => {
   const { led } = req.query;
+  console.log(led);
+
+  pipeline = [{ $match: { _id: "5eab53d3a524043460a84354" } }];
+
+  const changeStream = Home.watch(pipeline);
+
+  changeStream.on("change", function (event) {
+    console.log(JSON.stringify(event));
+  });
+
+  let repalce = await Home.updateOne(
+    { _id: "5eab53d3a524043460a84354" },
+    { light: led }
+  );
+
+  const match = await Home.findOne({ _id: "5eab53d3a524043460a84354" });
+  console.log(match.light);
 });
 
 server.listen(process.env.PORT || 8080, () => {
