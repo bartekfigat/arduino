@@ -14,45 +14,6 @@ const { Board, LCD, Relay } = require("johnny-five");
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
 
-// const pipeline = [
-//   { $match: { _id: "5eab53d3a524043460a84354" } },
-//   { $set: { light: "got" } },
-// ];
-// async function watcher() {
-//   const collection = Home.watch();
-
-//   const changeStream = collection.watch(pipeline);
-
-//   console.log(changeStream);
-// let home = await Home.find({});
-// // // await Home.deleteOne({});
-// console.log(home);
-
-// watcher();
-
-//============with promises================
-// Load hash from your password DB.
-// bcrypt.compare(myPlaintextPassword, hash).then(function(result) {
-// result == true
-// });
-// bcrypt.compare(someOtherPlaintextPassword, hash).then(function(result) {
-// result == false
-// });
-
-// (async function () {
-//   const hash = await bcrypt.hash(myPlaintextPassword, saltRounds);
-
-//   try {
-//     Home.insertMany({
-//       email: `${process.env.email}`,
-//       password: hash,
-//       created: new Date().getTime(),
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// })();
-
 server = express();
 server.use(morgan("tiny"));
 server.set("views", path.join(__dirname, "views"));
