@@ -5,7 +5,7 @@ module.exports = {
   dbConnection: () => {
     const db = process.env.DB_PASSWOR;
     mongoose
-      .connect(db, {
+      .connect(`${db}`, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
         useCreateIndex: true,
