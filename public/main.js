@@ -3,14 +3,18 @@ const socket = io();
 
 btn.addEventListener("click", () => {
   if (btn.checked) {
-    fetch(`/led/?led=${true}`, {
+    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${true}`, {
+      method: "GET",
+      mode: "cors",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
     });
   } else {
-    fetch(`/led/?led=${false}`, {
+    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${false}`, {
+      method: "GET",
+      mode: "cors",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",

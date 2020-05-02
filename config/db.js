@@ -8,7 +8,7 @@ module.exports = {
     const db = process.env.DB_PASSWOR;
     const db_heroku = process.env.DB_PASSWOR_HEOKU;
     mongoose
-      .connect(`${db}`, {
+      .connect(process.env.DB_PASSWOR, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
         useCreateIndex: true,
@@ -19,5 +19,12 @@ module.exports = {
       .catch((err) => {
         console.error("Error:", err);
       });
+    const changeStream = Home.watch({ fullDocument: "updateLookup" });
+    changeStream.on("change", (result) => {
+      io.on("connection", (socket) => {
+        console.log("Connected");
+      });
+      console.log(result);
+    });
   },
 };
