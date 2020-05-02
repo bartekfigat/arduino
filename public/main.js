@@ -3,16 +3,18 @@ const socket = io();
 
 btn.addEventListener("click", () => {
   if (btn.checked) {
-    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${true}`).then(
-      (res) => {
-        res.json();
-      }
-    );
+    fetch(`/led/?led=${true}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
   } else {
-    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${false}`).then(
-      (res) => {
-        res.json();
-      }
-    );
+    fetch(`/led/?led=${false}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
   }
 });
