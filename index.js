@@ -23,7 +23,12 @@ server.set("view engine", "ejs");
 server.use(express.static("public"));
 server.use(express.static(path.join(__dirname, "public")));
 server.use(favicon(__dirname + "/public/favicon.png"));
-server.use(cors());
+server.use(
+  cors({
+    credentials: true,
+    origin: " https://guarded-meadow-49625.herokuapp.com/",
+  })
+);
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
 
