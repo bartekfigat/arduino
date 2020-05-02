@@ -19,12 +19,5 @@ module.exports = {
       .catch((err) => {
         console.error("Error:", err);
       });
-    const changeStream = Home.watch({ fullDocument: "updateLookup" });
-    changeStream.on("change", (result) => {
-      io.on("connection", (socket) => {
-        console.log("Connected");
-      });
-      console.log(result);
-    });
   },
 };
