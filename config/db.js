@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 module.exports = {
   dbConnection: () => {
     const db = process.env.DB_PASSWOR;
+    const db_heroku = process.env.DB_PASSWOR_ARDUINO;
     mongoose
       .connect(`${db}`, {
         useUnifiedTopology: true,

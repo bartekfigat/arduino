@@ -6,6 +6,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const db = require("./config/db");
+const fetch = require("node-fetch");
 const favicon = require("express-favicon");
 const Home = require("./models/Home");
 const path = require("path");
@@ -35,18 +36,17 @@ server.get("/", (req, res) => {
 
 server.get("/led", async (req, res) => {
   const { led } = req.query;
-  console.log(led);
 
   const changeStream = Home.watch().on("change", (data) => {
     console.log(data);
   });
 
-  console.log(changeStream);
+  const updateLed = await Home.updateOne(
+    { _id: "5eab53d3a524043460a84354" },
+    { light: led }
+  );
 
-  await Home.updateOne({ _id: "5eab53d3a524043460a84354" }, { light: led });
-
-  const match = await Home.findOne({ _id: "5eab53d3a524043460a84354" });
-  console.log(match.light);
+  res.json({ updateLed });
 });
 
 server.listen(process.env.PORT || 8080, process.env.IP, () => {
