@@ -30,12 +30,16 @@ server.use(bodyParser.json());
 //DB connect
 db.dbConnection();
 
+let isOne = false;
+
 server.get("/", (req, res) => {
   res.render("index");
 });
 
 server.get("/led", async (req, res) => {
   const { led } = req.query;
+
+  isOne = led === "true";
 
   const changeStream = Home.watch().on("change", (data) => {
     console.log(data);
@@ -46,7 +50,11 @@ server.get("/led", async (req, res) => {
     { light: led }
   );
 
-  res.json({ updateLed });
+  if (updateLed) {
+    res.redirect("/");
+  } else {
+    return null;
+  }
 });
 
 server.listen(process.env.PORT || 8080, process.env.IP, () => {
