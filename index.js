@@ -11,7 +11,7 @@ const favicon = require("express-favicon");
 const Home = require("./models/Home");
 const path = require("path");
 const { Board, LCD, Relay } = require("johnny-five");
-//https://docs.mongodb.com/stitch/mongodb/watch/
+
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
 
@@ -44,8 +44,6 @@ server.get("/", (req, res) => {
 server.get("/led", async (req, res) => {
   const { led } = req.query;
 
-  isOne = led === "true";
-
   const changeStream = Home.watch().on("change", (data) => {
     console.log(data);
   });
@@ -62,6 +60,8 @@ server.get("/led", async (req, res) => {
   }
 });
 
-server.listen(process.env.PORT || 8080, process.env.IP, () => {
-  console.log(`Server is listening on port: ${process.env.PORT}`);
+const Port = process.env.PORT || 8080;
+
+server.listen(Port, () => {
+  console.log(`Server is listening on port: ${Port}`);
 });
