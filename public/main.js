@@ -1,24 +1,22 @@
-const btn = document.getElementById("toggle2");
-const socket = io();
+const btn = Array.from(document.getElementsByClassName("led"));
 
-btn.addEventListener("click", () => {
-  if (btn.checked) {
-    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${true}`, {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
-  } else {
-    fetch(`https://guarded-meadow-49625.herokuapp.com/led/?led=${false}`, {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
-  }
+function switches(element, state) {
+  fetch(`/led/?led=${state}&id=${element.attributes.id.value}`, {
+    method: "GET",
+    mode: "cors",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
+}
+
+btn.map((element) => {
+  element.addEventListener("click", () => {
+    if (element.checked) {
+      switches(element, true);
+    } else {
+      switches(element, false);
+    }
+  });
 });

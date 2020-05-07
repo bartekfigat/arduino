@@ -5,8 +5,13 @@ const mongoose = require("mongoose");
 const Home = new mongoose.Schema({
   email: { type: String },
   password: { type: String },
-  light: { type: String, default: "false" },
   created: { type: Date },
+  lighting: [
+    {
+      switch: { type: String },
+      state: { type: String, default: "false" },
+    },
+  ],
 });
 
 module.exports = mongoose.model("Home", Home);

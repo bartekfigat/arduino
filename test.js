@@ -11,34 +11,11 @@ const db = require("./config/db");
 const fetch = require("node-fetch");
 const favicon = require("express-favicon");
 const Home = require("./models/Home");
-const { Board, LCD, Relays } = require("johnny-five");
+const { Board, LCD, Relays, Relay } = require("johnny-five");
 
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
 //DB connect
-
-// (async function () {
-//   const hash = await bcrypt.hash(myPlaintextPassword, saltRounds);
-
-//   try {
-//     Home.insertMany({
-//       email: `${process.env.email}`,
-//       password: hash,
-//       created: new Date().getTime(),
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// })();
-
-(async function watcher() {
-  const agg = await Home.find(
-    { lighting: { $elemMatch: { switch: "pokoj" } } },
-    { "lighting.$": 1 }
-  );
-
-  console.log(agg[0].lighting[0].switch);
-})();
 
 const app = express();
 const server = http.createServer(app);
@@ -70,11 +47,23 @@ const board = new Board({
 
 board.on("ready", () => {
   console.log("redy");
-  const relay = new Relays([
-    { pin: 13, type: "NC", id: "kuchnia" },
-    { pin: 9, type: "NC", id: "pokoj" },
-    { pin: 8, type: "NC", id: "garaz" },
-  ]);
+  const kuchnia = new Relay({
+    pin: 13,
+    id: "kuchnia",
+    type: "NC",
+  });
+  const pokoj = new Relay({
+    pin: 12,
+    id: "pokoj",
+    type: "NC",
+  });
+  const garaz = new Relay({
+    pin: 11,
+    id: "garaz",
+    type: "NC",
+  });
+
+  const allRelays = [kuchnia, pokoj, garaz];
 
   let isOne = false;
 
@@ -84,47 +73,34 @@ board.on("ready", () => {
 
   app.get("/led", async (req, res) => {
     const { led, id } = req.query;
+    console.log(id);
 
-    const agg = await Home.find(
-      { lighting: { $elemMatch: { switch: id } } },
-      { "lighting.$": 1 }
+    const updateLed = await Home.updateOne(
+      { _id: "5eab53d3a524043460a84354" },
+      { light: led }
     );
-
-    const match = agg[0].lighting[0].switch;
-
-    if (match === id) {
-      console.log("ok");
-    } else {
-      console.log("not ok");
-    }
-
-    let numer;
 
     const changeStream = Home.watch({ fullDocument: "updateLookup" });
     changeStream.on("change", (result) => {
       console.log(result);
-      isOne = led === "false";
+      isOne = led === "true";
 
-      switch (id) {
-        case "kuchnia":
-          numer = 0;
-          break;
-        case "pokoj":
-          numer = 1;
-          break;
-        case "garaz":
-          numer = 2;
-          break;
-      }
-
-      if (isOne) {
-        relay[numer].off();
-      } else {
-        relay[numer].on();
-      }
+      allRelays.map((relays, index) => {
+        if (relays.id === id) {
+          if (isOne) {
+            relays.off();
+          } else {
+            relays.on();
+          }
+        }
+      });
     });
 
-    res.redirect("/");
+    if (updateLed) {
+      res.redirect("/");
+    } else {
+      return null;
+    }
   });
 
   const Port = process.env.PORT || 8080;
