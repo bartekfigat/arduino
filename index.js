@@ -15,29 +15,15 @@ const { Board, LCD, Relays } = require("johnny-five");
 
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
-//DB connect
-
-// (async function () {
-//   const hash = await bcrypt.hash(myPlaintextPassword, saltRounds);
-
-//   try {
-//     Home.insertMany({
-//       email: `${process.env.email}`,
-//       password: hash,
-//       created: new Date().getTime(),
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// })();
 
 (async function watcher() {
-  const agg = await Home.find(
-    { lighting: { $elemMatch: { switch: "pokoj" } } },
-    { "lighting.$": 1 }
-  );
+  try {
+    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
 
-  console.log(agg[0].lighting[0].switch);
+    console.log(home[0].lighting);
+  } catch (e) {
+    console.log(e);
+  }
 })();
 
 const app = express();
@@ -65,7 +51,7 @@ app.use(bodyParser.json());
 let isOne = false;
 
 const board = new Board({
-  port: "COM11",
+  port: "COM9",
 });
 
 board.on("ready", () => {
@@ -78,6 +64,8 @@ board.on("ready", () => {
 
   let isOne = false;
 
+  let matchOne;
+
   app.get("/", (req, res) => {
     res.render("index");
   });
@@ -85,25 +73,37 @@ board.on("ready", () => {
   app.get("/led", async (req, res) => {
     const { led, id } = req.query;
 
-    const agg = await Home.find(
-      { lighting: { $elemMatch: { switch: id } } },
-      { "lighting.$": 1 }
-    );
+    try {
+      const agg = await Home.find(
+        { lighting: { $elemMatch: { switch: id } } },
+        { "lighting.$": 1 }
+      );
 
-    const match = agg[0].lighting[0].switch;
+      const match = agg[0].lighting[0].switch;
+      matchOne = match;
 
-    if (match === id) {
-      console.log("ok");
-    } else {
-      console.log("not ok");
+      if (match === id) {
+        await Home.updateOne(
+          {
+            _id: "5eb5cdbb0ea7d8211d97e76e",
+            lighting: { $elemMatch: { switch: id } },
+          },
+          { $set: { "lighting.$.state": led } }
+        );
+      } else {
+        console.log("not ok");
+      }
+    } catch (e) {
+      console.log(e);
     }
 
     let numer;
 
-    const changeStream = Home.watch({ fullDocument: "updateLookup" });
+    const changeStream = Home.watch({
+      documentKey: { _id: "5eb5cdbb0ea7d8211d97e76e" },
+    });
     changeStream.on("change", (result) => {
-      console.log(result);
-      isOne = led === "false";
+      isOne = led === "true";
 
       switch (id) {
         case "kuchnia":
@@ -116,11 +116,16 @@ board.on("ready", () => {
           numer = 2;
           break;
       }
+      console.log("==================================================");
+      console.log(
+        `relay ID:${relay[numer].id}  relay PIN:${relay[numer].pin}  numer:${numer}`
+      );
+      console.log("==================================================");
 
       if (isOne) {
-        relay[numer].off();
+        relay[numer].close();
       } else {
-        relay[numer].on();
+        relay[numer].open();
       }
     });
 

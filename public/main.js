@@ -14,9 +14,9 @@ function switches(element, state) {
 btn.map((element) => {
   element.addEventListener("click", () => {
     if (element.checked) {
-      switches(element, true);
+      switches(element, "true");
     } else {
-      switches(element, false);
+      switches(element, "false");
     }
   });
 });
