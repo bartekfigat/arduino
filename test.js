@@ -41,6 +41,30 @@ app.use(bodyParser.json());
 
 let isOne = false;
 
+(async function watcher() {
+  try {
+    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
+    // await Home.updateMany(
+    //   {
+    //     _id: "5eb5cdbb0ea7d8211d97e76e",
+    //   },
+    //   {
+    //     $push: {
+    //       lighting: [
+    //         { switch: "kuchnia", state: "false" },
+    //         { switch: "pokoj", state: "false" },
+    //         { switch: "garaz", state: "false" },
+    //       ],
+    //     },
+    //   }
+    // );
+
+    console.log(home[0].lighting);
+  } catch (e) {
+    console.log(e);
+  }
+})();
+
 const board = new Board({
   port: "COM11",
 });

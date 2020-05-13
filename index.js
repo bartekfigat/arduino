@@ -11,20 +11,12 @@ const db = require("./config/db");
 const fetch = require("node-fetch");
 const favicon = require("express-favicon");
 const Home = require("./models/Home");
-const { Board, LCD, Relays } = require("johnny-five");
+const { updateState } = require("./controller/updateState");
+const { updatechangeStream } = require("./controller/changeStream");
+const { Board, LCD, Relays, Relay } = require("johnny-five");
 
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
-
-(async function watcher() {
-  try {
-    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
-
-    console.log(home[0].lighting);
-  } catch (e) {
-    console.log(e);
-  }
-})();
 
 const app = express();
 const server = http.createServer(app);
@@ -42,7 +34,7 @@ app.use(favicon(__dirname + "/public/favicon.png"));
 app.use(
   cors({
     credentials: true,
-    origin: "https://guarded-meadow-49625.herokuapp.com/",
+    optionsSuccessStatus: 200,
   })
 );
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -56,78 +48,40 @@ const board = new Board({
 
 board.on("ready", () => {
   console.log("redy");
-  const relay = new Relays([
-    { pin: 13, type: "NC", id: "kuchnia" },
-    { pin: 9, type: "NC", id: "pokoj" },
-    { pin: 8, type: "NC", id: "garaz" },
-  ]);
+  const r1 = new Relay({
+    pin: 13,
+    type: "NC",
+  });
+  const r2 = new Relay({
+    pin: 7,
+    type: "NC",
+  });
+  const r3 = new Relay({
+    pin: 3,
+    type: "NC",
+  });
+
+  const relay = new Relays([r1, r2, r3]);
 
   let isOne = false;
 
-  let matchOne;
-
-  app.get("/", (req, res) => {
-    res.render("index");
+  app.get("/", async (req, res) => {
+    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
+    res.render("index", { home });
   });
 
   app.get("/led", async (req, res) => {
     const { led, id } = req.query;
 
-    try {
-      const agg = await Home.find(
-        { lighting: { $elemMatch: { switch: id } } },
-        { "lighting.$": 1 }
-      );
+    await updateState(led, id);
 
-      const match = agg[0].lighting[0].switch;
-      matchOne = match;
-
-      if (match === id) {
-        await Home.updateOne(
-          {
-            _id: "5eb5cdbb0ea7d8211d97e76e",
-            lighting: { $elemMatch: { switch: id } },
-          },
-          { $set: { "lighting.$.state": led } }
-        );
-      } else {
-        console.log("not ok");
-      }
-    } catch (e) {
-      console.log(e);
-    }
-
-    let numer;
+    let num;
 
     const changeStream = Home.watch({
       documentKey: { _id: "5eb5cdbb0ea7d8211d97e76e" },
     });
-    changeStream.on("change", (result) => {
-      isOne = led === "true";
 
-      switch (id) {
-        case "kuchnia":
-          numer = 0;
-          break;
-        case "pokoj":
-          numer = 1;
-          break;
-        case "garaz":
-          numer = 2;
-          break;
-      }
-      console.log("==================================================");
-      console.log(
-        `relay ID:${relay[numer].id}  relay PIN:${relay[numer].pin}  numer:${numer}`
-      );
-      console.log("==================================================");
-
-      if (isOne) {
-        relay[numer].close();
-      } else {
-        relay[numer].open();
-      }
-    });
+    await updatechangeStream(changeStream, num, isOne, relay, led, id);
 
     res.redirect("/");
   });
