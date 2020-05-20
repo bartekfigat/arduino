@@ -1,6 +1,7 @@
+require("dotenv").config();
 const Home = require("../models/Home");
 
-const updateState = async (led, id) => {
+const updateState = async (led, id, io) => {
   try {
     const agg = await Home.find(
       { lighting: { $elemMatch: { switch: id } } },
@@ -13,7 +14,7 @@ const updateState = async (led, id) => {
     if (match === id) {
       await Home.updateOne(
         {
-          _id: "5eb5cdbb0ea7d8211d97e76e",
+          _id: `${process.env.id}`,
           lighting: { $elemMatch: { switch: id } },
         },
         { $set: { "lighting.$.state": led } }

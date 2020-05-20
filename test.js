@@ -11,11 +11,12 @@ const db = require("./config/db");
 const fetch = require("node-fetch");
 const favicon = require("express-favicon");
 const Home = require("./models/Home");
+const { updateState } = require("./controller/updateState");
+const { updatechangeStream } = require("./controller/changeStream");
 const { Board, LCD, Relays, Relay } = require("johnny-five");
 
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
-//DB connect
 
 const app = express();
 const server = http.createServer(app);
@@ -33,37 +34,11 @@ app.use(favicon(__dirname + "/public/favicon.png"));
 app.use(
   cors({
     credentials: true,
-    origin: "https://guarded-meadow-49625.herokuapp.com/",
+    optionsSuccessStatus: 200,
   })
 );
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-let isOne = false;
-
-(async function watcher() {
-  try {
-    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
-    // await Home.updateMany(
-    //   {
-    //     _id: "5eb5cdbb0ea7d8211d97e76e",
-    //   },
-    //   {
-    //     $push: {
-    //       lighting: [
-    //         { switch: "kuchnia", state: "false" },
-    //         { switch: "pokoj", state: "false" },
-    //         { switch: "garaz", state: "false" },
-    //       ],
-    //     },
-    //   }
-    // );
-
-    console.log(home[0].lighting);
-  } catch (e) {
-    console.log(e);
-  }
-})();
 
 const board = new Board({
   port: "COM11",
@@ -71,60 +46,44 @@ const board = new Board({
 
 board.on("ready", () => {
   console.log("redy");
-  const kuchnia = new Relay({
+  const r1 = new Relay({
     pin: 13,
-    id: "kuchnia",
     type: "NC",
   });
-  const pokoj = new Relay({
-    pin: 12,
-    id: "pokoj",
+  const r2 = new Relay({
+    pin: 7,
     type: "NC",
   });
-  const garaz = new Relay({
+  const r3 = new Relay({
     pin: 11,
-    id: "garaz",
     type: "NC",
   });
 
-  const allRelays = [kuchnia, pokoj, garaz];
+  const relay = new Relays([r1, r2, r3]);
 
   let isOne = false;
 
-  app.get("/", (req, res) => {
-    res.render("index");
+  app.get("/", async (req, res) => {
+    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
+    res.render("index", { home });
   });
 
-  app.get("/led", async (req, res) => {
-    const { led, id } = req.query;
-    console.log(id);
-
-    const updateLed = await Home.updateOne(
-      { _id: "5eab53d3a524043460a84354" },
-      { light: led }
-    );
-
-    const changeStream = Home.watch({ fullDocument: "updateLookup" });
-    changeStream.on("change", (result) => {
-      console.log(result);
-      isOne = led === "true";
-
-      allRelays.map((relays, index) => {
-        if (relays.id === id) {
-          if (isOne) {
-            relays.off();
-          } else {
-            relays.on();
-          }
-        }
-      });
+  io.on("connection", (socket) => {
+    socket.on("dataFromClient", (element, id) => {
+      console.log(`element:  ${element}`);
+      console.log(`id     :  ${id}`);
     });
+    app.get("/led", async (req, res) => {
+      const { led, id } = req.query;
 
-    if (updateLed) {
+      await updateState(led, id);
+
+      let num;
+
+      await updatechangeStream(num, isOne, relay, led, id);
+
       res.redirect("/");
-    } else {
-      return null;
-    }
+    });
   });
 
   const Port = process.env.PORT || 8080;

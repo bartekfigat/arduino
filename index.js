@@ -40,36 +40,16 @@ app.use(
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-let isOne = false;
-
-const board = new Board({
-  port: "COM9",
+app.get("/", async (req, res) => {
+  const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
+  res.render("index", { home });
 });
 
-board.on("ready", () => {
-  console.log("redy");
-  const r1 = new Relay({
-    pin: 13,
-    type: "NC",
+io.on("connection", (socket) => {
+  socket.on("dataFromClient", (element, id) => {
+    console.log(`element:  ${element}`);
+    console.log(`id     :  ${id}`);
   });
-  const r2 = new Relay({
-    pin: 7,
-    type: "NC",
-  });
-  const r3 = new Relay({
-    pin: 3,
-    type: "NC",
-  });
-
-  const relay = new Relays([r1, r2, r3]);
-
-  let isOne = false;
-
-  app.get("/", async (req, res) => {
-    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
-    res.render("index", { home });
-  });
-
   app.get("/led", async (req, res) => {
     const { led, id } = req.query;
 
@@ -77,18 +57,14 @@ board.on("ready", () => {
 
     let num;
 
-    const changeStream = Home.watch({
-      documentKey: { _id: "5eb5cdbb0ea7d8211d97e76e" },
-    });
-
-    await updatechangeStream(changeStream, num, isOne, relay, led, id);
+    await updatechangeStream(num, isOne, relay, led, id);
 
     res.redirect("/");
   });
+});
 
-  const Port = process.env.PORT || 8080;
+const Port = process.env.PORT || 8080;
 
-  server.listen(Port, () => {
-    console.log(`Server is listening on port: ${Port}`);
-  });
+server.listen(Port, () => {
+  console.log(`Server is listening on port: ${Port}`);
 });

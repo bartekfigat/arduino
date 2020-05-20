@@ -18,6 +18,7 @@
     "express": "^4.17.1",
     "express-device": "^0.4.2",
     "express-favicon": "^2.0.1",
+    "helmet": "^3.22.0",
     "http": "0.0.1-security",
     "http-proxy": "^1.18.0",
     "johnny-five": "^1.4.0",
@@ -26,7 +27,7 @@
     "net": "^1.0.2",
     "ngrok": "^3.2.7",
     "node-fetch": "^2.6.0",
-    "serialport": "^8.0.7",
+    "serialport": "^8.0.8",
     "socket.io": "^2.3.0"
   }
 }

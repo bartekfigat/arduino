@@ -1,32 +1,33 @@
-const updatechangeStream = async (changeStream, num, isOne, relay, led, id) => {
-  changeStream.on("change", (result) => {
-    isOne = led === "true";
+const updatechangeStream = async (num, isOne, relay, led, id, io) => {
+  isOne = led === "true";
 
-    switch (id) {
-      case "kuchnia":
-        num = 0;
-        break;
-      case "pokoj":
-        num = 1;
-        break;
-      case "garaz":
-        num = 2;
-        break;
-    }
-    console.log("==================================================");
-    console.log(
-      `relay ID:${relay[num].id}  relay PIN:${relay[num].pin}  number:${num}`
-    );
-    console.log("==================================================");
+  switch (id) {
+    case "kuchnia":
+      num = 0;
+      break;
+    case "pokoj":
+      num = 1;
+      break;
+    case "garaz":
+      num = 2;
+      break;
+    default:
+      console.log(`Sorry, we are out of ${id}.`);
+  }
+  // console.log("==================================================");
+  // console.log(`id:--------->${id}`);
+  // console.log(`led:-------->${led}`);
+  // console.log(`relay PIN:-->${relay[num].pin}`);
+  // console.log(`number:----->${num}`);
+  // console.log("==================================================");
 
-    // setTimeout(function(){  }, 5000);
+  // setTimeout(function(){  }, 5000);
 
-    if (isOne) {
-      relay[num].open();
-    } else {
-      relay[num].close();
-    }
-  });
+  if (isOne) {
+    relay[num].on();
+  } else {
+    relay[num].off();
+  }
 };
 
 module.exports = {
