@@ -33,6 +33,7 @@ app.use(express.static(path.join(__dirname, "./public")));
 app.use(favicon(__dirname + "/public/favicon.png"));
 app.use(
   cors({
+    origin: "https://guarded-meadow-49625.herokuapp.com/",
     credentials: true,
     optionsSuccessStatus: 200,
   })
@@ -54,10 +55,6 @@ io.on("connection", (socket) => {
     const { led, id } = req.query;
 
     await updateState(led, id);
-
-    let num;
-
-    await updatechangeStream(num, isOne, relay, led, id);
 
     res.redirect("/");
   });
