@@ -5,6 +5,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const http = require("http");
+const PubNub = require("pubnub");
 const socketio = require("socket.io");
 const bcrypt = require("bcrypt");
 const db = require("./config/db");
@@ -17,6 +18,10 @@ const { Board, LCD, Relays, Relay } = require("johnny-five");
 
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
+const pubnub = new PubNub({
+  subscribe_key: process.env.SUBSCRIBE_KEY,
+  publish_key: process.env.PUBLISH_KEY,
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -79,25 +84,6 @@ board.on("ready", () => {
       await updateState(led, id);
 
       let num;
-
-      pubnub.addListener({
-        status: function (statusEvent) {
-          if (statusEvent.category === "PNConnectedCategory") {
-            publishSampleMessage();
-          }
-        },
-        message: function (msg) {
-          console.log(msg.message.title);
-          console.log(msg.message.description);
-        },
-        presence: function (presenceEvent) {
-          // handle presence
-        },
-      });
-      console.log("Subscribing..");
-      pubnub.subscribe({
-        channels: ["hello_world"],
-      });
 
       await updatechangeStream(num, isOne, relay, led, id);
 

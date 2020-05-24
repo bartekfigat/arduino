@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const http = require("http");
 const socketio = require("socket.io");
+const PubNub = require("pubnub");
 const bcrypt = require("bcrypt");
 const db = require("./config/db");
 const fetch = require("node-fetch");
@@ -17,6 +18,10 @@ const { Board, LCD, Relays, Relay } = require("johnny-five");
 
 const saltRounds = 10;
 const myPlaintextPassword = `${process.env.Password}`;
+const pubnub = new PubNub({
+  subscribe_key: process.env.SUBSCRIBE_KEY,
+  publish_key: process.env.PUBLISH_KEY,
+});
 
 const app = express();
 const server = http.createServer(app);
@@ -62,47 +67,23 @@ board.on("ready", () => {
   const relay = new Relays([r1, r2, r3]);
 
   let isOne = false;
+  let num;
 
-  app.get("/", async (req, res) => {
-    const home = await Home.find({ _id: "5eb5cdbb0ea7d8211d97e76e" });
-    res.render("index", { home });
+  pubnub.addListener({
+    status: (statusEvent) => {
+      console.log(`Status: ${statusEvent}`);
+    },
+    message: async (msg) => {
+      const { clientLed, clientID } = msg.message;
+
+      await updatechangeStream(num, isOne, relay, clientLed, clientID);
+      console.log(`clientLed: ${clientLed}`);
+      console.log(`clientID: ${clientID}`);
+    },
   });
-
-  io.on("connection", (socket) => {
-    socket.on("dataFromClient", (element, id) => {
-      console.log(`element:  ${element}`);
-      console.log(`id     :  ${id}`);
-    });
-    app.get("/led", async (req, res) => {
-      const { led, id } = req.query;
-
-      await updateState(led, id);
-
-      let num;
-
-      pubnub.addListener({
-        status: function (statusEvent) {
-          if (statusEvent.category === "PNConnectedCategory") {
-            publishSampleMessage();
-          }
-        },
-        message: function (msg) {
-          console.log(msg.message.title);
-          console.log(msg.message.description);
-        },
-        presence: function (presenceEvent) {
-          // handle presence
-        },
-      });
-      console.log("Subscribing..");
-      pubnub.subscribe({
-        channels: ["hello_world"],
-      });
-
-      await updatechangeStream(num, isOne, relay, led, id);
-
-      res.redirect("/");
-    });
+  console.log("Subscribing..");
+  pubnub.subscribe({
+    channels: ["smart-switch"],
   });
 
   const Port = process.env.PORT || 8080;

@@ -7,6 +7,7 @@ const updateState = async (led, id, io) => {
       { lighting: { $elemMatch: { switch: id } } },
       { "lighting.$": 1 }
     );
+    // console.log(`updateState: ${led}/:${id}`);
 
     const match = agg[0].lighting[0].switch;
     matchOne = match;

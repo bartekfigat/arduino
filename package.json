@@ -27,6 +27,7 @@
     "net": "^1.0.2",
     "ngrok": "^3.2.7",
     "node-fetch": "^2.6.0",
+    "pubnub": "^4.27.6",
     "serialport": "^8.0.8",
     "socket.io": "^2.3.0"
   }
