@@ -20,7 +20,7 @@
     "express-favicon": "^2.0.1",
     "helmet": "^3.22.0",
     "http": "0.0.1-security",
-    "http-proxy": "^1.18.0",
+    "http-proxy": "^1.18.1",
     "johnny-five": "^1.4.0",
     "mongoose": "^5.9.10",
     "morgan": "^1.10.0",
