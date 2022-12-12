@@ -15,7 +15,7 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.0.2",
     "etag": "^1.8.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-device": "^0.4.2",
     "express-favicon": "^2.0.1",
     "helmet": "^3.22.0",
